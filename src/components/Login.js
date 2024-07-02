@@ -1,15 +1,92 @@
 //rafce- react arrow function 
 import React from 'react'
-import { useState } from 'react';
-import Header from './Header'
+import { useState ,useRef} from 'react';
+import Header from './Header';
+import {checkValidData} from "../utils/validate.js"
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../utils/firebase.js';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice.js';
 
 const Login = () => {
-const[isSignInForm,setIsSignInForm]=useState(true);
-
-const toggleSignInForm=()=>
-  {
-      setIsSignInForm(!isSignInForm);
+  const [isSignInForm, setIsSignInForm] = useState(true);
+  const [errorMessage,setErrorMessage]=useState();
+  const navigate=useNavigate();
+  const dispatch=useDispatch();
+  const name=useRef(null);
+  const email=useRef(null);
+  const password=useRef(null);
+  
+  const toggleSignInForm = () => {
+    setIsSignInForm(!isSignInForm);
   }
+
+  const handleButtonClick=()=>
+    {
+      const message=checkValidData(email.current.value,password.current.value);
+      console.log(message);
+      setErrorMessage(message)
+      if(message) return;
+
+      //if no message perform Sign in or Sign up Login
+      if(!isSignInForm)
+        {
+          //Sign Up Login here
+
+          createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+         .then((userCredential) => 
+          {
+            const user = userCredential.user;
+                updateProfile(user, {
+                  displayName: name.current.value, 
+                  photoURL: "https://media.licdn.com/dms/image/D5603AQGwTwUY-pQ3WA/profile-displayphoto-shrink_200_200/0/1683558540699?e=2147483647&v=beta&t=a1ZwbSGxKokz5-_xw-coeHywjfb5IIaYr3lTtInMug8"
+                  }).then(() => {
+
+                   
+                  const {uid,email,displayName,photoURL} = auth.currentUser;
+                  dispatch(addUser({
+                    uid:uid,
+                    email:email,
+                    displayname:displayName,
+                    photoURL:photoURL}));
+                  navigate("/browse")
+
+                  }).catch((error) => {
+                 
+                    setErrorMessage(error.message)
+                  });
+           
+               }).catch((error) => {
+
+                  const errorCode = error.code;
+                  const errorMessage = error.message;
+                  setErrorMessage(errorCode+"-"+errorMessage);
+           });
+
+        }
+      else
+      {
+          //Sign In Logic here
+
+          signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+          .then((userCredential) => {
+          // Signed in 
+          const user = userCredential.user;
+          console.log(user);
+          navigate('/browse')
+       })
+         .catch((error) => {
+         const errorCode = error.code;
+         const errorMessage = error.message;
+         setErrorMessage(errorCode+"-"+errorMessage);
+        });
+      }
+
+
+      
+    }
 
   return (
     <div>
@@ -22,13 +99,36 @@ const toggleSignInForm=()=>
       </div>
 
 
-      <form className='flex flex-col w-fit absolute  p-12 my-32 mx-auto right-0 left-0 text-white bg-black '>
-        <h1 className='p-2 m-2 font-bold text-xl'>{isSignInForm?"Sign In":"Sign Up"}</h1>
-        {!isSignInForm && <input className='p-2 m-2 rounded-md bg-inherit border border-solid' type='text' placeholder='Full Name'/>}
-        <input className='p-2 m-2 rounded-md bg-inherit border border-solid' type='text' placeholder='Email or mobile number'/>
-        <input className='p-2 m-2 rounded-md bg-inherit border border-solid' type='password' placeholder='Password'/>
-        <button className='p-2 m-2 rounded-md bg-red-600'>{isSignInForm?"Sign In":"Sign Up"}</button>
-        <p className='text-gray-400 p-2 m-2 cursor-pointer' onClick={toggleSignInForm}>{isSignInForm?"New to NetFlix? Sign Up Now":"Already Registred Sign In Now"}</p>
+      <form onSubmit={(e)=>e.preventDefault()} className='flex flex-col w-1/4 h-fit absolute  p-8 my-32 mx-auto right-0 left-0 text-white bg-black opacity-0.5'>
+        <h1 className='p-2 m-2 font-bold text-xl'>
+          {isSignInForm ? "Sign In" : "Sign Up"}</h1>
+        
+        {!isSignInForm && 
+        (<input 
+          ref={name}
+          className='p-2 m-2 rounded-md bg-inherit border border-solid' 
+          type='text' placeholder='Full Name' />)}
+        
+        <input 
+        ref={email}
+        className='p-2 m-2 rounded-md bg-inherit border border-solid' 
+        type='text'
+        placeholder='Email or mobile number' />
+        
+        <input 
+        ref={password}
+        className='p-2 m-2 rounded-md bg-inherit border border-solid' 
+        type='password' 
+        placeholder='Password' />
+        
+        {errorMessage && <p className='p-2 m-2 text-bold text-red-500 text-lg'>{errorMessage}</p>}
+        <button 
+        className='p-2 m-2 rounded-md bg-red-600'
+        onClick={handleButtonClick}
+        >
+          {isSignInForm ? "Sign In" : "Sign Up"}
+        </button>
+        <p className='text-gray-400 p-2 m-2 cursor-pointer' onClick={toggleSignInForm}>{isSignInForm ? "New to NetFlix? Sign Up Now" : "Already Registred Sign In Now"}</p>
       </form>
     </div>
   )
