@@ -1,11 +1,33 @@
 import React from 'react'
 import Header from './Header'
 
+import  useNowPlayingMovies  from '../hooks/useNowPlayingMovies'
+import MainContainer from './MainContainer';
+import SecondaryContainer from './SecondaryContainer';
+
 const Browse = () => {
+
+  useNowPlayingMovies();
+
+ 
   return (
     <div>
       <Header/>
-      <h2>test</h2></div>
+      <MainContainer/>
+      <SecondaryContainer/>
+
+
+
+      {/*  Main Container
+             -video playing background
+             -title of movie
+          second container
+             -movieslist*n
+             -card*n
+      */}
+
+      
+      </div>
   )
 }
 

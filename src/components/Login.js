@@ -6,14 +6,13 @@ import {checkValidData} from "../utils/validate.js"
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../utils/firebase.js';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice.js';
+import { USER_AVATAR } from '../utils/constants.js';
 
 const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
   const [errorMessage,setErrorMessage]=useState();
-  const navigate=useNavigate();
   const dispatch=useDispatch();
   const name=useRef(null);
   const email=useRef(null);
@@ -26,7 +25,6 @@ const Login = () => {
   const handleButtonClick=()=>
     {
       const message=checkValidData(email.current.value,password.current.value);
-      console.log(message);
       setErrorMessage(message)
       if(message) return;
 
@@ -41,7 +39,8 @@ const Login = () => {
             const user = userCredential.user;
                 updateProfile(user, {
                   displayName: name.current.value, 
-                  photoURL: "https://media.licdn.com/dms/image/D5603AQGwTwUY-pQ3WA/profile-displayphoto-shrink_200_200/0/1683558540699?e=2147483647&v=beta&t=a1ZwbSGxKokz5-_xw-coeHywjfb5IIaYr3lTtInMug8"
+                   photoURL:USER_AVATAR
+                  // photoURL: "https://media.licdn.com/dms/image/D5603AQGwTwUY-pQ3WA/profile-displayphoto-shrink_200_200/0/1683558540699?e=2147483647&v=beta&t=a1ZwbSGxKokz5-_xw-coeHywjfb5IIaYr3lTtInMug8"
                   }).then(() => {
 
                    
@@ -49,9 +48,9 @@ const Login = () => {
                   dispatch(addUser({
                     uid:uid,
                     email:email,
-                    displayname:displayName,
+                    displayName:displayName,
                     photoURL:photoURL}));
-                  navigate("/browse")
+                  
 
                   }).catch((error) => {
                  
@@ -74,8 +73,9 @@ const Login = () => {
           .then((userCredential) => {
           // Signed in 
           const user = userCredential.user;
-          console.log(user);
-          navigate('/browse')
+        
+        
+    
        })
          .catch((error) => {
          const errorCode = error.code;
@@ -99,7 +99,7 @@ const Login = () => {
       </div>
 
 
-      <form onSubmit={(e)=>e.preventDefault()} className='flex flex-col w-1/4 h-fit absolute  p-8 my-32 mx-auto right-0 left-0 text-white bg-black opacity-0.5'>
+      <form onSubmit={(e)=>e.preventDefault()} className='flex flex-col w-1/4  h-fit absolute  p-8 my-32 max-w-screen-sm mx-auto right-0 left-0 text-white bg-black opacity-85'>
         <h1 className='p-2 m-2 font-bold text-xl'>
           {isSignInForm ? "Sign In" : "Sign Up"}</h1>
         
