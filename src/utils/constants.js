@@ -14,3 +14,6 @@ export const API_OPTIONS = {
 
 export const Empty_Profile=
 "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRKNdKRIgbcMkyGq1cQeq40IA-IQS-FDWnTQ&s"
+
+export const IMG_CDN=
+"https://image.tmdb.org/t/p/w780/"
